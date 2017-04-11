@@ -668,9 +668,10 @@ POL_Wine_InstallVersion()
 	WINE_SECTION="$ARCH_PREFIX-$POL_ARCH"
 	WINEDIR="$POL_USER_ROOT/wine/$WINE_SECTION"
 	touch "$WINEDIR/installing"
+	POL_Versions_GenList
 	if [ ! -e "$WINEDIR/$POL_WINEVERSION" ]
 	then
-		WINE_ADDRESS=$($POL_WGET "$WINE_SITE/$WINE_SECTION.lst" -O- | grep ";$POL_WINEVERSION;" | tail -n 1 | cut -d ";" -f1)
+		WINE_ADDRESS=$(echo $VERSION_LIST | grep ";$POL_WINEVERSION;" | tail -n 1 | cut -d ";" -f1)
 		if [ "$WINE_ADDRESS" = "" ] && [ "$POL_ARCH" = "amd64" ]
 		then
 			POL_Debug_Warning "Wine $1 amd64 does not exist. Switching to x86"
@@ -688,16 +689,27 @@ POL_Wine_InstallVersion()
 			POL_SetupWindow_download "$(eval_gettext "Downloading Wine: ")$POL_WINEVERSION" "$TITLE" "$WINE_SITE/$WINE_SECTION/$WINE_ADDRESS"
 			POL_SetupWindow_wait_next_signal "$(eval_gettext "Downloading Wine: ")$POL_WINEVERSION" "$TITLE"
 			sleep 1
-			sha1=$($POL_WGET "$WINE_SITE/$WINE_SECTION/$WINE_ADDRESS.sha1" -O- | awk '{print $1}')
-			sha1_file=$(shasum "./$WINE_ADDRESS" | awk '{print $1}')
-			echo "Server sha1 : $sha1"
-			echo "Client sha1 : $sha1_file"
+			gpgsig=$($POL_WGET "$WINE_SITE/$WINE_SECTION$WINE_ADDRESS.sign" -O- | awk '{print $1}')
+			gpgout=$(echo "$gpgsig" | gpg --verify ./$WINE_ADDRESS - 2>&1)
+			gpgerr=$?
+			gpgkey=$(echo "$gpgout" | grep RSA | awk '{print $5}')
 
-			if [ ! "$sha1" = "$sha1_file" ]
+			if echo "$gpgout" | grep "No public key"
 			then
-				POL_SetupWindow_message "$(eval_gettext 'The download seems to have failed.')" "$TITLE"
+				if gpg --recv-keys "$gpgkey"
+				then
+					echo "$gpgsig" | gpg --verify ./$WINE_ADDRESS - 2>&1
+					gpgerr=$?
+				else
+					POL_SetupWindow_message "$(eval_gettext 'Importing key $gpgkey failed.')" "$TITLE"
+				fi
+			fi
+
+			if [ ! $gpgerr ]
+			then
+				POL_SetupWindow_message "$(eval_gettext 'The download could not be verified.')" "$TITLE"
 			else
-				POL_SetupWindow_wait "$(eval_gettext 'Extracting Wine...')" "$TITLE"
+				POL_SetupWindow_wait "$(eval_gettext 'Building Wine...')" "$TITLE"
 				bash "$PLAYONLINUX/playonlinux-pkg" -i "$PWD/$WINE_ADDRESS"
 			fi
 			rm "$WINE_ADDRESS"

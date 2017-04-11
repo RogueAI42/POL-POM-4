@@ -35,6 +35,7 @@ then
 	source "$PLAYONLINUX/lib/website.lib"
 	source "$PLAYONLINUX/lib/wine.lib"
 	source "$PLAYONLINUX/lib/dosbox.lib"
+	source "$PLAYONLINUX/lib/versions.lib"
 fi
 if [ ! "$DONT_MONITOR" ]; then
 	set -o monitor
