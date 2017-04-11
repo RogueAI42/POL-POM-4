@@ -75,7 +75,7 @@ install:
 	cp ./bin/{playonlinux,playonlinux-pkg} $(bindir)/
 	cp ./bin/playonlinux-check_dd $(execdir)/
 	cp ./{playonlinux*,README.md,TRANSLATORS,CHANGELOG.md,LICENCE} $(sharedir)/playonlinux/
-	cp -R ./{bash,etc,lib,plugins,python,resources,tests} $(sharedir)/playonlinux/
+	cp -R ./{bash,etc,lib,plugins,python,resources,tests,WineBuild} $(sharedir)/playonlinux/
 	cp -R ./lang/locale/* $(sharedir)/locale/
 
 changelog:
