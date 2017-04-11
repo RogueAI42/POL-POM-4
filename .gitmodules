@@ -1,0 +1,3 @@
+[submodule "WineBuild"]
+	path = WineBuild
+	url = https://github.com/RogueAI42/WineBuild
