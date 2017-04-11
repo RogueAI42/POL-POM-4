@@ -40,6 +40,7 @@ all: build
 clean:
 	$(RM) ./python/*.pyc
 	$(RM) ./python/lib/*.pyc
+	$(RM) ./WineBuild/python/*.pyc
 	$(RM) ./bin/check_dd
 	$(RM) ./bin/playonlinux
 	$(RM) ./bin/playonlinux-pkg
@@ -49,6 +50,7 @@ build:
 	$(CC) ./src/check_direct_rendering.c -o ./bin/playonlinux-check_dd
 	$(PYTHON) ./python/*.py
 	$(PYTHON) ./python/lib/*.py
+	$(PYTHON) ./WineBuild/python/*.py
 	echo -e '#!/bin/bash\nGDK_BACKEND=x11 ${sharedir}/playonlinux/playonlinux "$$@"\nexit 0' > ./bin/playonlinux
 	echo -e '#!/bin/bash\n${sharedir}/playonlinux/playonlinux-pkg "$$@"\nexit 0' > ./bin/playonlinux-pkg
 	chmod +x ./bin/playonlinux
